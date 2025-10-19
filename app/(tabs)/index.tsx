@@ -1,6 +1,8 @@
 // 1. 더미 데이터 (Dummy Data)
 // 아직 데이터베이스가 없으므로, 화면에 보여줄 가짜 메모 데이터입니다
-import { StyleSheet, View, Text, SafeAreaView} from "react-native";
+import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity} from "react-native";
+import {Link} from "expo-router";
+
 
 
 const DUMMY_MEMOS = [
@@ -17,6 +19,11 @@ export default function MemoScreen() {
       {/*  --- 3. 헤더(제목) 영역 ---*/}
         <View style={styles.header}>
           <Text style={styles.title}>Memos</Text>
+            <Link href={"/create-memo"} asChild>
+                <TouchableOpacity style={styles.addButton}>
+                    <Text style={styles.addButtonText}>+</Text>
+                </TouchableOpacity>
+            </Link>
         </View>
 
       {/*  --- 4. 메모 목록 영역 --- */}
@@ -42,6 +49,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff', // 배경색을 흰색으로
     },
     header: {
+        flexDirection: 'row', // 아이템들을 가로로 배열
+        justifyContent: 'space-between', // 아이템들 사이에 공간을 만듦
+        alignItems: 'center', // 아이템들을 세로 중앙에 정렬
         padding: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
@@ -49,6 +59,19 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
         fontWeight: 'bold',
+    },
+    addButton: {
+        backgroundColor: '#007AFF',
+        width: 44,
+        height: 44,
+        borderRadius: 22, // 원 모양으로 만듦
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    addButtonText: {
+        color: '#fff',
+        fontSize: 24,
+        fontWeight: 'bold'
     },
     listContainer: {
         padding: 20,
