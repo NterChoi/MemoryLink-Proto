@@ -1,29 +1,43 @@
 import {SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert} from "react-native";
 import {useState} from "react";
 import {router} from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function CreateMemoScreen() {
 
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('');
 
-    const handleSaveMemo = () => {
+    const handleSaveMemo = async () => {
         if (!title.trim() || !content.trim()) {
             Alert.alert('오류', '제목과 내용을 입력해주세요.');
             return;
         }
 
-        // 5-2. (임시) 콘솔에 저장될 데이터 출력
-        // 지금은 데이터베이스가 없으므로, 입력된 값이 잘 저장되었는지 콘솔에 출력하여 확인.
-        // 이것이 7일차 목표인 AsyncStorage로 데이터를 영구 저장하는 로직으로 대체될 예정
-        console.log('저장될 메모: ', {title, content});
+        // 1. 새 메모 객체 생성
+        const newMemo = {
+            id: Date.now().toString(),
+            title: title.trim(),
+            content: content.trim(),
+        }
 
-        // 5-3. (임시) 사용자에게 저장 완료 알림
-        Alert.alert('성공', '메모가 성공적으로 저장되었습니다! (콘솔 확인)', [
-            {text: '확인', onPress: () => router.back()} // 확인을 누르면 이전 화면으로 돌아갑니다.
-        ]);
+        try {
+            // 2. 기존에 저장된 메모 불러오기
+            const existingMemos = await AsyncStorage.getItem('memos');
+            const memos = existingMemos ? JSON.parse(existingMemos) : [];
 
-        // TODO: (7일차 목표) 여기서 AsyncStorage를 사용해 데이터를 실제로 저장합니다
+            // 3. 새 메모를 배열에 추가하기
+            memos.push(newMemo);
+
+            // 4. 전체 메모 배열을 다시 저장하기
+            await AsyncStorage.setItem('memos', JSON.stringify(memos));
+
+            // 5. 저장 후 이전 화면으로 돌아가기
+            router.back();
+        } catch (e) {
+            console.error("Failed to save memo.", e);
+            Alert.alert('오류', '메모를 저장하는 데 실패했습니다.');
+        }
     }
 
   return (

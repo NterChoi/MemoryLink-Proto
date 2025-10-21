@@ -1,22 +1,42 @@
-// 1. 더미 데이터 (Dummy Data)
-// 아직 데이터베이스가 없으므로, 화면에 보여줄 가짜 메모 데이터입니다
 import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity} from "react-native";
-import {Link} from "expo-router";
+import {Link, useFocusEffect} from "expo-router";
+import {useCallback, useState} from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 
-const DUMMY_MEMOS = [
-  { id: 'm1', title: 'React Native 공부', content: 'JSX와 컴포넌트 개념 익히기'},
-  {id: 'm2', title: '저녁 장보기', content: '우유, 계란, 빵'},
-  {id: 'm3', title: '운동하기', content: '공원에서 30분 조깅'}
-];
+interface Memo {
+    id: string;
+    title: string;
+    content: string;
+}
 
 export default function MemoScreen() {
+    const [memos, setMemos] = useState<Memo[]>([]);
+
+    // 2. 화면이 포커스될 때마다 데이터를 불러오는 로직을 추가합니다.
+    useFocusEffect(
+        useCallback(() => {
+            loadMemos();
+        }, [])
+    );
+
+    // 3. AsyncStorage에서 데이터를 불러오는 함수를 정의
+    const loadMemos = async () => {
+        try {
+            const storedMemos = await AsyncStorage.getItem('memos');
+            if (storedMemos !== null) {
+                setMemos(JSON.parse(storedMemos));
+            }
+        } catch (e) {
+            console.error("Failed to load memos.", e);
+        }
+    };
+
   return (
       // 2. safeAreaView: 노치 디자인 대응
       // 아이폰의 노치(상단 카메라 부분)나 하단 바 영역을 피해 콘텐츠를 안전하게 보여주는 컨테이너입니다.
       <SafeAreaView style={styles.container}>
-      {/*  --- 3. 헤더(제목) 영역 ---*/}
         <View style={styles.header}>
           <Text style={styles.title}>Memos</Text>
             <Link href={"/create-memo"} asChild>
@@ -28,10 +48,7 @@ export default function MemoScreen() {
 
       {/*  --- 4. 메모 목록 영역 --- */}
         <View style={styles.listContainer}>
-        {/*  --- 5. JavaScript의 map 함수를 이용해 데이터 렌더링 ---*/}
-        {/*  DUMMY_MEMOS 배열의 각 아이템을 순회하며 화면 요소로 변환합니다. */}
-          { DUMMY_MEMOS.map((memo) => (
-              // --- 6. 개별 메모 아이템
+          { memos.map((memo) => (
               // key 속성은 React가 목록의 각 항목을 구별하기 위해 필요합니다.
               <View key={memo.id} style={styles.memoItem}>
                   <Text style={styles.memoTitle}>{memo.title}</Text>
